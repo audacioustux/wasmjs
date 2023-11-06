@@ -20,7 +20,7 @@ pub struct HttpRequestsConfig {
 impl Default for HttpRequestsConfig {
     fn default() -> Self {
         Self {
-            allowed_hosts: Vec::default(),
+            allowed_hosts: vec!["aws.connect.psdb.cloud".to_string()],
             allowed_methods: Vec::from([
                 String::from("GET"),
                 String::from("POST"),
@@ -91,10 +91,7 @@ impl Http for HttpBindings {
         {
             return Err(HttpRequestError {
                 error: HttpError::NotAllowed,
-                message: format!(
-                    "The host '{}' is not allowed for this worker. Please, update the worker configuration.",
-                    uri.host().unwrap()
-                ),
+                message: format!("'{}' is not in the allowed hosts list", uri.host().unwrap()),
             });
         }
 
@@ -103,8 +100,7 @@ impl Http for HttpBindings {
         {
             return Err(HttpRequestError {
                 error: HttpError::NotAllowed,
-                message:
-                    "The URI must use HTTPS. You can allow http requests in the worker configuration".to_string()
+                message: "Only https is allowed".to_string(),
             });
         }
 
@@ -115,8 +111,7 @@ impl Http for HttpBindings {
         {
             return Err(HttpRequestError {
                 error: HttpError::NotAllowed,
-                message:
-                    format!("The method '{}' is not allowed for this worker. Please, update the configuration.", method.as_str())
+                message: format!("'{}' method not allowed", method.as_str()),
             });
         }
 
@@ -178,7 +173,7 @@ impl Http for HttpBindings {
             },
             Err(_) => Err(HttpRequestError {
                 error: HttpError::InternalError,
-                message: "There was an error processing the request on the host side.".to_string(),
+                message: "Could not process the request".to_string(),
             }),
         }
     }

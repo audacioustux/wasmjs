@@ -18,7 +18,7 @@ use std::path::PathBuf;
 pub struct Args {
     #[arg(value_parser, default_value = ".")]
     path: PathBuf,
-    #[arg(long = "host", default_value = "127.0.0.1")]
+    #[arg(long = "host", default_value = "0.0.0.0")]
     hostname: String,
     #[arg(short, long, default_value_t = 8080)]
     port: u16,

@@ -2,7 +2,7 @@ use javy::quickjs::{JSContextRef, JSValue, JSValueRef};
 use javy::{json, Runtime};
 use std::collections::HashMap;
 use std::{
-    fs,
+    env, fs,
     io::{stdin, stdout, Read, Write},
 };
 
@@ -142,6 +142,13 @@ fn main() {
     contents.push_str(POLYFILL);
 
     stdin().read_to_string(&mut request).unwrap();
+
+    let mut env_vars = HashMap::new();
+    for (key, val) in env::vars() {
+        env_vars.insert(key, val);
+    }
+    let env_vars_json = serde_json::to_string(&env_vars).unwrap();
+    contents.push_str(&format!("globalThis.env = {};", env_vars_json));
 
     contents.push_str(&source.unwrap());
 

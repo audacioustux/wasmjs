@@ -4,9 +4,7 @@ use serde::Deserialize;
 use serde::Deserializer;
 use std::collections::HashMap;
 use std::env;
-use std::fs;
 use std::path::PathBuf;
-use toml::from_str;
 
 #[derive(Deserialize, Clone, Default)]
 #[serde(default)]
@@ -50,19 +48,9 @@ pub struct Config {
     #[serde(default)]
     pub features: Features,
     pub folders: Option<Vec<Folder>>,
-    pub data: Option<ConfigData>,
     #[serde(deserialize_with = "read_environment_variables", default)]
     pub vars: HashMap<String, String>,
 }
-
-impl Config {
-    pub fn try_from_file(path: PathBuf) -> Result<Self> {
-        from_str(&fs::read_to_string(path)?).map_err(|e| e.into())
-    }
-}
-
-#[derive(Deserialize, Clone, Default)]
-pub struct ConfigData {}
 
 fn read_environment_variables<'de, D>(
     deserializer: D,

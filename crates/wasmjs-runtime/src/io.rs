@@ -77,7 +77,7 @@ impl WasmOutput {
 
     pub fn failed(err: anyhow::Error, worker_name: Option<String>, route: Option<String>) -> Self {
         eprintln!(
-            "Error running worker {:?} at route {:?}: {:?}",
+            "Error running {:?} at route {:?}: {:?}",
             worker_name, route, err
         );
         Self::new(

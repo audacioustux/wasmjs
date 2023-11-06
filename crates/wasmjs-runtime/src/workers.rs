@@ -5,7 +5,6 @@ use crate::io::{WasmInput, WasmOutput};
 use crate::runtime::{init_runtime, CtxBuilder, Runtime};
 use actix_web::HttpRequest;
 use sha256::digest as sha256_digest;
-use std::fs;
 use std::path::PathBuf;
 use std::{collections::HashMap, path::Path};
 use wasmtime::Linker;
@@ -62,18 +61,8 @@ impl Worker {
     pub fn new(project_root: &Path, path: &Path) -> Result<Self> {
         let id = sha256_digest(project_root.join(path).to_string_lossy().as_bytes());
 
-        let mut config_path = path.to_path_buf();
-        config_path.set_extension("toml");
         let mut config = Config::default();
-
-        if fs::metadata(&config_path).is_ok() {
-            match Config::try_from_file(config_path) {
-                Ok(c) => config = c,
-                Err(e) => {
-                    eprintln!("Error loading the worker configuration: {}", e);
-                }
-            }
-        }
+        config.vars = std::env::vars().collect();
 
         let engine = Engine::new(
             WasmtimeConfig::default()

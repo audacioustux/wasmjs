@@ -1,6 +1,129 @@
-import URLSearchParams from "@ungap/url-search-params";
+// import { URLSearchParams } from "@ungap/url-search-params";
 import { TextEncoder, TextDecoder } from "@sinonjs/text-encoding";
 import httpStatus from "http-status";
+import { Buffer } from 'buffer'
+import Url from 'url-parse'
+import _queryString from 'query-string';
+
+class URL {
+
+    constructor(urlStr, base = undefined) {
+        let url = Url(urlStr, base)
+        this.url = url
+        this.protocol = url.protocol
+        this.slashes = url.slashes
+        this.auth = url.auth
+        this.username = url.username
+        this.password = url.password
+        this.host = url.host
+        this.port = url.port
+        this.pathname = url.pathname
+        this.search = url.query
+        this.searchParams = new URLSearchParams(this.search)
+        this.hash = url.hash
+        this.href = url.origin
+        this.origin = url.origin
+    }
+
+    set(key, value) {
+        this.url.set(key, value)
+    }
+
+    toString() {
+        return this.url.toString()
+    }
+
+    toJson() {
+        return this.url.toString()
+    }
+
+}
+
+class URLSearchParams {
+    queryParams = {}
+
+    constructor(val) {
+        this.queryParams = {
+            ..._queryString.parse(val)
+        }
+    }
+    append(key, val) {
+        this.queryParams[key] = val
+    }
+    delete(key) {
+        delete this.queryParams[key]
+    }
+    entries() {
+        let arr = []
+        Object.entries(this.queryParams).map(o => {
+            if (Array.isArray(o[1])) {
+                o[1].map(k => {
+                    arr.push([o[0], k])
+                })
+            } else {
+                arr.push([o[0], o[1]])
+            }
+        })
+        let iterLength = arr.length
+        let iterIndex = 0
+        return {
+            next: function () {
+                return iterIndex < iterLength ?
+                    { value: arr[iterIndex++], done: false } :
+                    { done: true };
+            }
+        }
+    }
+    get(key) {
+        let val = this.queryParams[key]
+        if (val) {
+            if (typeof (val) == "object") {
+                return val[0]
+            }
+            return val
+        }
+        return null
+    }
+    getAll(key) {
+        let val = this.queryParams[key]
+        if (val) {
+            return val
+        }
+        return null
+    }
+    has(key) {
+        return this.queryParams[key] != undefined ? true : false
+    }
+    keys() {
+        return Object.keys(this.queryParams)
+    }
+    set(key, val) {
+        this.queryParams[key] = val
+    }
+    toString() {
+        return _queryString.stringify(this.queryParams)
+    }
+    values() {
+        return Object.keys(this.queryParams).map(k => this.queryParams[k])
+    }
+    [Symbol.iterator]() {
+        return this.entries()
+    }
+}
+
+globalThis.URL = URL;
+globalThis.URLSearchParams = URLSearchParams;
+
+function atob(b64) {
+    return Buffer.from(b64, "base64").toString()
+}
+
+function btoa(data) {
+    return Buffer.from(data).toString('base64')
+}
+
+globalThis.btoa = btoa;
+globalThis.atob = atob;
 
 class Headers {
     constructor(initialHeaders) {
@@ -202,8 +325,6 @@ class Response {
     Reflect.deleteProperty(globalThis, "__console_log");
 })();
 
-
-globalThis.URLSearchParams = URLSearchParams;
 globalThis.TextEncoder = TextEncoder;
 globalThis.TextDecoder = TextDecoder;
 
